@@ -33,7 +33,7 @@ def index() -> rx.Component:
     return rx.fragment(
         rx.color_mode_button(rx.color_mode_icon(), float="right"),
         rx.vstack(
-            rx.heading("Movie Picker", font_size="2em"),
+            rx.heading("Movie Recommender", font_size="2em"),
             rx.menu(
                 rx.menu_button(State.selected_genre, style={"fontSize": "25px"}, border="0.1em solid", border_radius="0.5em", padding="0.05em"),
                 rx.menu_list(
