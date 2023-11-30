@@ -15,10 +15,14 @@ class State(rx.State):
     checked: bool = False
     is_checked: bool = False
     runtime: int = 120
-    movie = ""
-    movie_runtime = 0
+    movie = "N/A"
+    plot = "N/A"
+    movie_runtime = "N/A"
+    actors = "N/A"
+    rating = "N/A"
+    awards = "N/A"
     show_recommendation: bool = False
-    poster = "/assets/favicon.ico"
+    poster = "Poster not available"
 
     def change_check(self, checked: bool):
         self.checked = checked
@@ -48,12 +52,43 @@ class State(rx.State):
             self.poster = requests.get(
                 "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
             ).json()["Poster"]
+            self.actors = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Actors"]
+            self.rating = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Ratings"][0]["Value"]
+            self.plot = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Plot"]
+            self.awards = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Awards"]
             self.movie_runtime = aruntime_find["runtime"].values.tolist()[rand]
             self.show_recommendation = True
         except IndexError:
             return rx.window_alert("Please select a genre")
         except KeyError:
-            return rx.window_alert("Poster not found")
+            rand = random.randint(0, len(movie_find))
+            self.movie = movie_find[rand]
+            self.poster = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Poster"]
+            self.actors = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Actors"]
+            self.rating = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Ratings"][0]["Value"]
+            self.plot = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Plot"]
+            self.awards = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Awards"]
+            self.movie_runtime = aruntime_find["runtime"].values.tolist()[rand]
+            self.show_recommendation = True
+
 
 @rx.page(route="/", title="Movie Recommender")
 def index() -> rx.Component:
@@ -124,21 +159,62 @@ def index() -> rx.Component:
                 padding="0.5em",
                 border_radius="0.2em",
             ),
-            # show movie title after pressing recommend button
+
             rx.cond(
                 State.show_recommendation,
                 rx.table_container(
                     rx.table(
-                        headers=[rx.text("Movie", align="center")],
-                        rows=[
-                            (
+                        # Title Poster Plot Rating Actors Runtime Awards
+                        rx.tr(
+                            rx.td(
                                 rx.box(
                                     rx.text("Title", font_size="10px", align="center"),
                                     rx.text(State.movie, align="center"),
                                     align="center",
                                 ),
                             ),
-                            (
+                            
+                        ),
+                        rx.tr(
+                            rx.td(
+                                rx.box(
+                                    rx.text("Plot", font_size="10px", align="center"),
+                                    rx.text(State.plot, align="center"),
+                                    align="center",
+                                ),
+                            )
+                        ),
+                        rx.tr(
+                            rx.td(
+                                rx.box(
+                                    rx.text("Actors", font_size="10px", align="center"),
+                                    rx.text(State.actors, align="center"),
+                                    align="center",
+                                ),
+                            )
+                        ),
+                        rx.tr(
+                            rx.td(
+                                rx.box(
+                                    rx.text("Awards", font_size="10px", align="center"),
+                                    rx.text(State.awards, align="center"),
+                                    align="center",
+                                ),
+                            )
+                        ),
+                        rx.tr(
+                            rx.td(
+                                rx.box(
+                                    rx.text(
+                                        "IMDB Rating", font_size="10px", align="center"
+                                    ),
+                                    rx.text(State.rating, align="center"),
+                                    align="center",
+                                ),
+                            )
+                        ),
+                        rx.tr(
+                            rx.td(
                                 rx.box(
                                     rx.text(
                                         "Runtime", font_size="10px", align="center"
@@ -148,8 +224,10 @@ def index() -> rx.Component:
                                     ),
                                     align="center",
                                 ),
-                            ),
-                            (
+                            )
+                        ),
+                        rx.tr(
+                            rx.td(
                                 rx.box(
                                     rx.text("Poster", font_size="10px", align="center"),
                                     rx.image(
@@ -159,13 +237,15 @@ def index() -> rx.Component:
                                     ),
                                     align="center",
                                 ),
-                            ),
-                        ],
+                            )
+                        ),
+                        headers=[rx.text("Movie", align="center")],
                     ),
                     align="center",
                     center_content=True,
                 ),
             ),
+
             font_size="2em",
         ),
     )

@@ -1,5 +1,5 @@
 import reflex as rx
 
 config = rx.Config(
-    app_name="Movie Recommender",
+    app_name="project",
 )
