@@ -19,6 +19,7 @@ This program is locally runnable via the command line, using localhost and port 
 
 ```
 pip install -r requirements.txt
+reflext init
 reflex run
 ```
 
