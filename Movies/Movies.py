@@ -1,21 +1,24 @@
-"""Welcome to Reflex! This file outlines the steps to create a basic app."""
 from rxconfig import config
-
 import reflex as rx
 import pandas as pd
 import random
+import requests
 
 
 movies = pd.read_csv("movies_metadata.csv", low_memory=False)
-
 filename = f"{config.app_name}/{config.app_name}.py"
+API_KEY = "a26b7da7"
 
 
 class State(rx.State):
     selected_genre: str = "Select Genre"
-
     checked: bool = False
     is_checked: bool = False
+    runtime: int = 120
+    movie = ""
+    movie_runtime = 0
+    show_recommendation: bool = False
+    poster = "/assets/favicon.ico"
 
     def change_check(self, checked: bool):
         self.checked = checked
@@ -24,32 +27,33 @@ class State(rx.State):
         else:
             self.is_checked = False
 
-    runtime: int = 120
-
     def recommend(self):
         genre = self.selected_genre
         adult = self.is_checked
         runtime = self.runtime
         adult_find = movies[movies["adult"] == str(adult)]
         if adult:
-            genre_find = movies[movies["genres"].str.contains(genre)]
-            runtime_find = genre_find[movies["runtime"] < runtime]
-            aruntime_find = runtime_find[movies["runtime"] != 0]
+            genre_find = movies.loc[movies["genres"].str.contains(genre)]
+            runtime_find = genre_find.loc[movies["runtime"] < runtime]
+            aruntime_find = runtime_find.loc[movies["runtime"] != 0]
             movie_find = (aruntime_find["title"]).values.tolist()
         else:
-            genre_find = adult_find[movies["genres"].str.contains(genre)]
-            runtime_find = genre_find[movies["runtime"] < runtime]
-            aruntime_find = runtime_find[movies["runtime"] != 0]
+            genre_find = adult_find.loc[movies["genres"].str.contains(genre)]
+            runtime_find = genre_find.loc[movies["runtime"] < runtime]
+            aruntime_find = runtime_find.loc[movies["runtime"] != 0]
             movie_find = (aruntime_find["title"]).values.tolist()
         try:
-            print(movie_find[random.randint(0, len(movie_find))])
+            rand = random.randint(0, len(movie_find))
+            self.movie = movie_find[rand]
+            self.poster = requests.get(
+                "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
+            ).json()["Poster"]
+            self.movie_runtime = aruntime_find["runtime"].values.tolist()[rand]
+            self.show_recommendation = True
         except IndexError:
             return rx.window_alert("Please select a genre")
-
-
-genre = State.selected_genre
-adult = State.is_checked
-runtime = State.runtime
+        except KeyError:
+            return rx.window_alert("Poster not found")
 
 
 def index() -> rx.Component:
@@ -120,12 +124,53 @@ def index() -> rx.Component:
                 padding="0.5em",
                 border_radius="0.2em",
             ),
+            # show movie title after pressing recommend button
+            rx.cond(
+                State.show_recommendation,
+                rx.table_container(
+                    rx.table(
+                        headers=[rx.text("Movie", align="center")],
+                        rows=[
+                            (
+                                rx.box(
+                                    rx.text("Title", font_size="10px", align="center"),
+                                    rx.text(State.movie, align="center"),
+                                    align="center",
+                                ),
+                            ),
+                            (
+                                rx.box(
+                                    rx.text(
+                                        "Runtime", font_size="10px", align="center"
+                                    ),
+                                    rx.text(
+                                        f"{State.movie_runtime} Minutes", align="center"
+                                    ),
+                                    align="center",
+                                ),
+                            ),
+                            (
+                                rx.box(
+                                    rx.text("Poster", font_size="10px", align="center"),
+                                    rx.image(
+                                        src=State.poster,
+                                        alt="Movie Poster",
+                                        align="center",
+                                    ),
+                                    align="center",
+                                ),
+                            ),
+                        ],
+                    ),
+                    align="center",
+                    center_content=True,
+                ),
+            ),
             font_size="2em",
         ),
     )
 
 
-# Add state and page to the app.
 app = rx.App()
 app.add_page(index)
 app.compile()
