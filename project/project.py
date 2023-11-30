@@ -55,7 +55,7 @@ class State(rx.State):
         except KeyError:
             return rx.window_alert("Poster not found")
 
-
+@rx.page(route="/", title="Movie Recommender")
 def index() -> rx.Component:
     return rx.fragment(
         rx.color_mode_button(rx.color_mode_icon(), float="right"),
