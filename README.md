@@ -10,7 +10,17 @@ project.py in the `projects` directory is where all the code is stored. movies_m
 
 reflex was used to create the frontend. Reflex is a pyton module that allows for the creation of web applications with only python.
 
-There is a dropdown menu that allows the selection of the genre of the movie. There is a switch that enables recommendation of adult content. When the the adult-mode is on, it with recommend both adult and non-adult movies. The slider is used to adjust the maximum runtime of the recommended movie. When pressing the recommend button, a 3 by 1 table is generated that contains the movie title, runtime, and a poster.
+There is a dropdown menu that allows the selection of the genre of the movie. There is a switch that enables recommendation of adult content. When the the adult-mode is on, it with recommend both adult and non-adult movies. The slider is used to adjust the maximum runtime of the recommended movie. When pressing the recommend button, a 7 by 1 table is generated that contains the information of the movie: 
+
+* Title
+* Poster
+* Plot
+* Rating
+* Actors
+* Runtime
+* 
+
+There are multiple error handling processes within the program as shown in the video. There is also a function that allows for the use of light mode and dark mode.
 
 
 #### Setup

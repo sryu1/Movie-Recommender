@@ -61,6 +61,14 @@ class State(rx.State):
             self.plot = requests.get(
                 "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
             ).json()["Plot"]
+            self.plot = " ".join(
+                [
+                    self.plot.split()[i] + "<br><br>"
+                    if (i + 1) % 15 == 0
+                    else self.plot.split()[i]
+                    for i in range(len(self.plot.split()))
+                ]
+            )
             self.awards = requests.get(
                 "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
             ).json()["Awards"]
@@ -83,6 +91,14 @@ class State(rx.State):
             self.plot = requests.get(
                 "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
             ).json()["Plot"]
+            self.plot = " ".join(
+                [
+                    self.plot.split()[i] + "<br><br>"
+                    if (i + 1) % 15 == 0
+                    else self.plot.split()[i]
+                    for i in range(len(self.plot.split()))
+                ]
+            )
             self.awards = requests.get(
                 "http://www.omdbapi.com/?apikey=" + API_KEY + "&t=" + self.movie
             ).json()["Awards"]
@@ -159,12 +175,10 @@ def index() -> rx.Component:
                 padding="0.5em",
                 border_radius="0.2em",
             ),
-
             rx.cond(
                 State.show_recommendation,
                 rx.table_container(
                     rx.table(
-                        # Title Poster Plot Rating Actors Runtime Awards
                         rx.tr(
                             rx.td(
                                 rx.box(
@@ -173,31 +187,25 @@ def index() -> rx.Component:
                                     align="center",
                                 ),
                             ),
-                            
+                        ),
+                        rx.tr(
+                            rx.td(
+                                rx.box(
+                                    rx.text("Poster", font_size="10px", align="center"),
+                                    rx.image(
+                                        src=State.poster,
+                                        alt="Movie Poster",
+                                        align="center",
+                                    ),
+                                    align="center",
+                                ),
+                            )
                         ),
                         rx.tr(
                             rx.td(
                                 rx.box(
                                     rx.text("Plot", font_size="10px", align="center"),
-                                    rx.text(State.plot, align="center"),
-                                    align="center",
-                                ),
-                            )
-                        ),
-                        rx.tr(
-                            rx.td(
-                                rx.box(
-                                    rx.text("Actors", font_size="10px", align="center"),
-                                    rx.text(State.actors, align="center"),
-                                    align="center",
-                                ),
-                            )
-                        ),
-                        rx.tr(
-                            rx.td(
-                                rx.box(
-                                    rx.text("Awards", font_size="10px", align="center"),
-                                    rx.text(State.awards, align="center"),
+                                    rx.html(State.plot, align="center"),
                                     align="center",
                                 ),
                             )
@@ -209,6 +217,15 @@ def index() -> rx.Component:
                                         "IMDB Rating", font_size="10px", align="center"
                                     ),
                                     rx.text(State.rating, align="center"),
+                                    align="center",
+                                ),
+                            )
+                        ),
+                        rx.tr(
+                            rx.td(
+                                rx.box(
+                                    rx.text("Actors", font_size="10px", align="center"),
+                                    rx.text(State.actors, align="center"),
                                     align="center",
                                 ),
                             )
@@ -229,12 +246,8 @@ def index() -> rx.Component:
                         rx.tr(
                             rx.td(
                                 rx.box(
-                                    rx.text("Poster", font_size="10px", align="center"),
-                                    rx.image(
-                                        src=State.poster,
-                                        alt="Movie Poster",
-                                        align="center",
-                                    ),
+                                    rx.text("Awards", font_size="10px", align="center"),
+                                    rx.text(State.awards, align="center"),
                                     align="center",
                                 ),
                             )
@@ -245,7 +258,6 @@ def index() -> rx.Component:
                     center_content=True,
                 ),
             ),
-
             font_size="2em",
         ),
     )
